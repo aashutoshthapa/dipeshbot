@@ -5,6 +5,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import asyncio
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -15,7 +16,13 @@ bot = commands.Bot(command_prefix='.', intents=intents)
 # === Google Sheets Setup ===
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/spreadsheets",
          "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(os.getenv("GOOGLE_CREDS_FILE"), scope)
+
+gcp_creds_json = os.getenv("GCP_CREDS_JSON")
+if gcp_creds_json:
+    creds_dict = json.loads(gcp_creds_json)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+else:
+    creds = ServiceAccountCredentials.from_json_keyfile_name(os.getenv("GOOGLE_CREDS_FILE"), scope)
 client = gspread.authorize(creds)
 
 sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1BJQGOS6uiy_urusrf4ZvMbYL6-A0KDtgczNWKpmnCDk/edit")
